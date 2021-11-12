@@ -1,21 +1,23 @@
-class Cat
+class Backdoor
+  def initialize(app, who = "no one")
+    @app = app
+    @who = who
+  end
+
   def call(env)
-    [
-    '200',
-    {'Content-Type' => 'text/html'},
-    ['hello you are in class']
-   ]
+    status, headers, body = @app.call(env)
+    body << "br />hacked by #{@who}"
+
+    [status, headers, body]
   end
 end
 
-kitty = Cat.new
+use Backdoor, "5xruby"
 
-run kitty
-
-# run Proc.new { |env|
-#   [
-#     '200',
-#     {'Content-Type' => 'text/html'},
-#     ['hello rack']
-#   ]
-# }
+run Proc.new { |env|
+  [
+    '200',
+    {'Content-Type' => 'text/html'},
+    ['hello rack']
+  ]
+}
